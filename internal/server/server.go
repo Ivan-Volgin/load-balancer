@@ -38,6 +38,19 @@ func (s *Server) proxyHandler() http.HandlerFunc {
 			return
 		}
 		proxy := httputil.NewSingleHostReverseProxy(backend.URL)
+		proxy.ErrorHandler = func(rw http.ResponseWriter, r *http.Request, err error) {
+			s.logger.Errorw("Error while request redirection",
+				"backend", backend,
+				"error", err.Error())
+
+			backend.Mu.Lock()
+			backend.Available = false
+			backend.Mu.Unlock()
+			s.logger.Infow("Backend status switched to unavailable",
+				"backend", backend.URL.String())
+
+			http.Error(rw, err.Error(), http.StatusBadGateway)
+		}
 		proxy.ServeHTTP(w, r)
 	}
 }
