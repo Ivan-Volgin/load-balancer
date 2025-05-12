@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
+	"os"
 )
 
 type Config struct {
@@ -12,7 +12,7 @@ type Config struct {
 }
 
 func LoadConfig(path string) (*Config, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading config file: %s", err)
 	}
