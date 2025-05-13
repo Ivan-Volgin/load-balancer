@@ -12,10 +12,10 @@ import (
 type Server struct {
 	balancer balancing_algorithms.Balancer
 	logger   *zap.SugaredLogger
-	port     int
+	port     *int
 }
 
-func NewServer(backends []*models.Backend, logger *zap.SugaredLogger, port int) *Server {
+func NewServer(backends []*models.Backend, logger *zap.SugaredLogger, port *int) *Server {
 	return &Server{
 		balancer: balancing_algorithms.NewRoundRobinBalancer(backends, logger),
 		logger:   logger,
@@ -26,7 +26,8 @@ func NewServer(backends []*models.Backend, logger *zap.SugaredLogger, port int) 
 func (s *Server) Start() error {
 	http.HandleFunc("/", s.proxyHandler())
 	s.logger.Infow("Starting server", "port", s.port)
-	return http.ListenAndServe(fmt.Sprintf(":%d", s.port), nil)
+	addr := fmt.Sprintf(":%d", *s.port)
+	return http.ListenAndServe(addr, nil)
 }
 
 func (s *Server) proxyHandler() http.HandlerFunc {
