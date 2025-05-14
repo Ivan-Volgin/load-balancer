@@ -19,6 +19,7 @@ type Repository interface {
 	GetClientByID(ctx context.Context, id string) (*m.RateLimitClient, error)
 	UpdateClient(ctx context.Context, client m.RateLimitClient) error
 	DeleteClient(ctx context.Context, id string) error
+	GetAllClients(ctx context.Context) ([]*m.RateLimitClient, error)
 	Close()
 }
 

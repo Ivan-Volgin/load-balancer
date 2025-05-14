@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	createClientQuery = `INSERT INTO clients (client_id, capacity, rate_per_second, tokens, last_refill_at) VALUES ($1, $2, $3, $4, $5)`
-	getClientQuery    = `SELECT client_id, capacity, rate_per_second, tokens, last_refill_at FROM clients WHERE client_id = $1`
-	updateClientQuery = `UPDATE clients SET capacity = $2, rate_per_second = $3, tokens = $4, last_refill_at = $5 WHERE client_id = $1`
-	deleteClientQuery = `DELETE FROM clients WHERE client_id = $1`
+	createClientQuery  = `INSERT INTO clients (client_id, capacity, rate_per_second, tokens, last_refill_at) VALUES ($1, $2, $3, $4, $5)`
+	getClientQuery     = `SELECT client_id, capacity, rate_per_second, tokens, last_refill_at FROM clients WHERE client_id = $1`
+	updateClientQuery  = `UPDATE clients SET capacity = $2, rate_per_second = $3, tokens = $4, last_refill_at = $5 WHERE client_id = $1`
+	deleteClientQuery  = `DELETE FROM clients WHERE client_id = $1`
+	getAllClientsQuery = `SELECT client_id, capacity, rate_per_second, tokens, last_refill_at FROM clients`
 )
 
 func (r *repository) CreateClient(ctx context.Context, client m.RateLimitClient) error {
@@ -59,4 +60,32 @@ func (r *repository) DeleteClient(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (r *repository) GetAllClients(ctx context.Context) ([]*m.RateLimitClient, error) {
+	rows, err := r.pool.Query(ctx, getAllClientsQuery)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query all clients")
+	}
+	defer rows.Close()
+
+	var clients []*m.RateLimitClient
+	for rows.Next() {
+		var client m.RateLimitClient
+		if err := rows.Scan(
+			&client.ClientID,
+			&client.Capacity,
+			&client.RatePerSecond,
+			&client.Tokens,
+			&client.LastRefillAt,
+		); err != nil {
+			return nil, errors.Wrap(err, "failed to scan row")
+		}
+		clients = append(clients, &client)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "rows iteration error")
+	}
+
+	return clients, nil
 }
