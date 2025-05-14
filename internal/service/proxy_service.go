@@ -2,7 +2,6 @@ package service
 
 import (
 	"go.uber.org/zap"
-	"load-balancer/internal/models"
 	"load-balancer/pkg/balancing_algorithms"
 	"net/http"
 	"net/http/httputil"
@@ -13,9 +12,9 @@ type ProxyService struct {
 	logger   *zap.SugaredLogger
 }
 
-func NewProxyService(backends []*models.Backend, logger *zap.SugaredLogger) *ProxyService {
+func NewProxyService(balancer balancing_algorithms.Balancer, logger *zap.SugaredLogger) *ProxyService {
 	return &ProxyService{
-		balancer: balancing_algorithms.NewRoundRobinBalancer(backends, logger),
+		balancer: balancer,
 		logger:   logger,
 	}
 }

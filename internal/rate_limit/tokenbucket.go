@@ -18,10 +18,10 @@ type TokenBucket struct {
 	logger  *zap.SugaredLogger
 }
 
-func NewTokenBucket(repo repo.Repository, logger zap.SugaredLogger) *TokenBucket {
+func NewTokenBucket(repo repo.Repository, logger *zap.SugaredLogger) *TokenBucket {
 	return &TokenBucket{
 		repo:   repo,
-		logger: &logger,
+		logger: logger,
 	}
 }
 

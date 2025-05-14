@@ -7,7 +7,7 @@ import (
 	"load-balancer/internal/service"
 )
 
-func RegisterRoutes(proxySvc *service.ProxyService, clientSvc *service.ClientService, middleware middleware.RateLimitMiddleware) {
+func RegisterRoutes(proxySvc *service.ProxyService, clientSvc *service.ClientService, middleware *middleware.RateLimitMiddleware) {
 	http.HandleFunc("/", middleware.Middleware(proxySvc.ProxyHandler()))
 	http.HandleFunc("POST /clients", clientSvc.CreateClientHandler())
 	http.HandleFunc("GET /clients/{id}", clientSvc.GetClientHandler())

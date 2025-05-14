@@ -1,7 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"load-balancer/internal/rate_limit"
+	"load-balancer/internal/repo"
+	"load-balancer/internal/server/middleware"
+	"load-balancer/internal/service"
 	"net/url"
 	"sync"
 	"time"
@@ -28,12 +33,20 @@ func main() {
 	if err != nil {
 		logger.Fatalw("failed to load config file", "error", err)
 	}
+	logger.Infow("config loaded", "config", cfg)
+
+	dbRepo, err := repo.NewRepository(context.Background(), cfg.PostgreSQL)
+	if err != nil {
+		logger.Fatalw("failed to connect to database", "error", err)
+	}
+	logger.Infow("connected to database")
 
 	var backends []*models.Backend
 	for _, urlStr := range cfg.Backends {
 		url, err := url.Parse(urlStr)
 		if err != nil {
 			logger.Fatalw("failed to parse url", "url", urlStr, "error", err)
+			continue
 		}
 		backends = append(backends, &models.Backend{
 			URL:       url,
@@ -42,10 +55,24 @@ func main() {
 		})
 	}
 
+	balancerFactory := balancing_algorithms.NewBalancerFactory(logger)
+	balancer := balancerFactory.Create(backends, cfg.BalanceStrategy)
 	balancing_algorithms.StartHealthCheck(backends, time.Second*5, logger)
 
+	proxyService := service.NewProxyService(balancer, logger)
+
+	clientService := service.NewClientService(dbRepo)
+
+	tokenBucket := rate_limit.NewTokenBucket(dbRepo, logger)
+	go tokenBucket.StartBackgroundSync(context.Background(), dbRepo, time.Second*7)
+	go tokenBucket.StartBackgroundSync(context.Background(), dbRepo, time.Minute)
+	go tokenBucket.ReplenishAll(context.Background(), time.Second*5)
+
+	rateLimiter := middleware.NewRateLimitMiddleware(tokenBucket, dbRepo)
+
+	server.RegisterRoutes(proxyService, clientService, rateLimiter)
+
 	srv := server.NewServer(
-		backends,
 		logger,
 		cfg.Port,
 	)

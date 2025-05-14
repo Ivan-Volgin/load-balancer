@@ -8,21 +8,22 @@ import (
 )
 
 type Config struct {
-	Port       *int     `yaml:"port"`
-	Backends   []string `yaml:"backends"`
-	PostgreSQL PostgreSQL
+	Port            *int     `yaml:"port"`
+	BalanceStrategy string   `yaml:"balance_strategy"`
+	Backends        []string `yaml:"backends"`
+	PostgreSQL      PostgreSQL
 }
 
 type PostgreSQL struct {
-	Host                string        `envconfig:"DB_HOST" required:"true"`
-	Port                int           `envconfig:"DB_PORT" required:"true"`
-	Name                string        `envconfig:"DB_NAME" required:"true"`
-	User                string        `envconfig:"DB_USER" required:"true"`
-	Password            string        `envconfig:"DB_PASSWORD" required:"true"`
-	SSLMode             string        `envconfig:"DB_SSL_MODE" default:"disable"`
-	PoolMaxConns        int           `envconfig:"DB_POOL_MAX_CONNS" default:"5"`
-	PoolMaxConnLifetime time.Duration `envconfig:"DB_POOL_MAX_CONN_LIFETIME" default:"180s"`
-	PoolMaxConnIdleTime time.Duration `envconfig:"DB_POOL_MAX_CONN_IDLE_TIME" default:"100s"`
+	Host                string        `yaml:"db_host" required:"true"`
+	Port                int           `yaml:"db_port" required:"true"`
+	Name                string        `yaml:"db_name" required:"true"`
+	User                string        `yaml:"db_user" required:"true"`
+	Password            string        `yaml:"db_password" required:"true"`
+	SSLMode             string        `yaml:"db_ssl_mode" default:"disable"`
+	PoolMaxConns        int           `yaml:"db_pool_max_conns" default:"5"`
+	PoolMaxConnLifetime time.Duration `yaml:"db_pool_max_conn_lifetime" default:"180s"`
+	PoolMaxConnIdleTime time.Duration `yaml:"db_pool_max_conn_idle_time" default:"100s"`
 }
 
 func LoadConfig(path string) (*Config, error) {
