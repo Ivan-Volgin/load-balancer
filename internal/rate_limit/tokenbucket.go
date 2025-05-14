@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"load-balancer/internal/repo"
-	"github.com/pkg/errors"
 )
 
 type TokenBucket struct {

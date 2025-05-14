@@ -3,55 +3,23 @@ package server
 import (
 	"fmt"
 	"go.uber.org/zap"
-	"load-balancer/internal/models"
-	"load-balancer/pkg/balancing_algorithms"
 	"net/http"
-	"net/http/httputil"
 )
 
 type Server struct {
-	balancer balancing_algorithms.Balancer
-	logger   *zap.SugaredLogger
-	port     *int
+	logger *zap.SugaredLogger
+	port   *int
 }
 
-func NewServer(backends []*models.Backend, logger *zap.SugaredLogger, port *int) *Server {
+func NewServer(logger *zap.SugaredLogger, port *int) *Server {
 	return &Server{
-		balancer: balancing_algorithms.NewRoundRobinBalancer(backends, logger),
-		logger:   logger,
-		port:     port,
+		logger: logger,
+		port:   port,
 	}
 }
 
 func (s *Server) Start() error {
-	http.HandleFunc("/", s.proxyHandler())
 	s.logger.Infow("Starting server", "port", s.port)
 	addr := fmt.Sprintf(":%d", *s.port)
 	return http.ListenAndServe(addr, nil)
-}
-
-func (s *Server) proxyHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		backend := s.balancer.Next()
-		if backend == nil {
-			s.logger.Errorw("There is no available backend")
-			http.Error(w, "All backends are unavailable", http.StatusServiceUnavailable)
-			return
-		}
-		proxy := httputil.NewSingleHostReverseProxy(backend.URL)
-		proxy.ErrorHandler = func(rw http.ResponseWriter, r *http.Request, err error) {
-			s.logger.Errorw("Error while request redirection",
-				"backend", backend,
-				"error", err.Error())
-
-			backend.Mu.Lock()
-			backend.Available = false
-			backend.Mu.Unlock()
-			s.logger.Infow("Backend status switched to unavailable",
-				"backend", backend.URL.String())
-
-			http.Error(rw, err.Error(), http.StatusBadGateway)
-		}
-		proxy.ServeHTTP(w, r)
-	}
 }
