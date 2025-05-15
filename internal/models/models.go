@@ -13,11 +13,11 @@ type Backend struct {
 }
 
 type RateLimitClient struct {
-	ClientID      string // уникальный ключ (IP или API-ключ)
-	Capacity      int64  // ёмкость bucket
-	RatePerSecond int64  // скорость пополнения токенов
-	Tokens        int64  // текущее количество токенов
-	LastRefillAt  int64  // время последнего пополнения (Unix timestamp)
+	ClientID      string `json:"client_id"`
+	Capacity      int64  `json:"capacity"`
+	RatePerSecond int64  `json:"rate_per_second"`
+	Tokens        int64  `json:"tokens"`
+	LastRefillAt  int64  `json:"last_refill_at"`
 }
 
 type RateLimitState struct {

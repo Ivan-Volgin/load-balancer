@@ -61,7 +61,7 @@ func main() {
 
 	proxyService := service.NewProxyService(balancer, logger)
 
-	clientService := service.NewClientService(dbRepo)
+	clientService := service.NewClientService(dbRepo, logger)
 
 	tokenBucket := rate_limit.NewTokenBucket(dbRepo, logger)
 	go tokenBucket.StartBackgroundSync(context.Background(), dbRepo, time.Second*7)

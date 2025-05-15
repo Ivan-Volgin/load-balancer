@@ -8,10 +8,10 @@ import (
 )
 
 type Config struct {
-	Port            *int     `yaml:"port"`
-	BalanceStrategy string   `yaml:"balance_strategy"`
-	Backends        []string `yaml:"backends"`
-	PostgreSQL      PostgreSQL
+	Port            *int       `yaml:"port"`
+	BalanceStrategy string     `yaml:"balance_strategy"`
+	Backends        []string   `yaml:"backends"`
+	PostgreSQL      PostgreSQL `yaml:"postgres"`
 }
 
 type PostgreSQL struct {

@@ -20,44 +20,11 @@ type TokenBucket struct {
 
 func NewTokenBucket(repo repo.Repository, logger *zap.SugaredLogger) *TokenBucket {
 	return &TokenBucket{
-		repo:   repo,
-		logger: logger,
+		repo:    repo,
+		logger:  logger,
+		clients: make(map[string]*models.RateLimitState),
 	}
 }
-
-//func (tb *TokenBucket) Allow(ctx context.Context, clientID string) (bool, error) {
-//	tb.mu.Lock()
-//	defer tb.mu.Unlock()
-//
-//	client, err := tb.repo.GetClientByID(ctx, clientID)
-//	if err != nil {
-//		return false, err
-//	}
-//
-//	if client == nil {
-//		return false, errors.New("client not found")
-//	}
-//
-//	now := time.Now().Unix()
-//	interval := now - client.LastRefillAt
-//	newTokens := interval * client.RatePerSecond
-//
-//	client.Tokens = min(client.Tokens+newTokens, client.Capacity)
-//	client.LastRefillAt = now
-//
-//	if client.Tokens < 1 {
-//		return false, nil
-//	}
-//
-//	client.Tokens--
-//
-//	err = tb.repo.UpdateClient(ctx, *client)
-//	if err != nil {
-//		return false, err
-//	}
-//
-//	return true, nil
-//}
 
 func (tb *TokenBucket) Allow(ctx context.Context, clientID string) (bool, error) {
 	tb.mu.Lock()

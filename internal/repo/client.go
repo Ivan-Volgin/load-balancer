@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 
@@ -11,7 +10,7 @@ import (
 
 const (
 	createClientQuery  = `INSERT INTO clients (client_id, capacity, rate_per_second, tokens, last_refill_at) VALUES ($1, $2, $3, $4, $5)`
-	getClientQuery     = `SELECT client_id, capacity, rate_per_second, tokens, last_refill_at FROM clients WHERE client_id = $1`
+	getClientQuery     = `SELECT capacity, rate_per_second, tokens, last_refill_at FROM clients WHERE client_id = $1`
 	updateClientQuery  = `UPDATE clients SET capacity = $2, rate_per_second = $3, tokens = $4, last_refill_at = $5 WHERE client_id = $1`
 	deleteClientQuery  = `DELETE FROM clients WHERE client_id = $1`
 	getAllClientsQuery = `SELECT client_id, capacity, rate_per_second, tokens, last_refill_at FROM clients`
