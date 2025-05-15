@@ -8,6 +8,8 @@ import (
 
 const tsKey = "timestamp"
 
+// NewLogger — создаёт настраиваемый логгер на основе библиотеки zap, с поддержкой уровня логирования, JSON-форматом и выводом в stdout.
+// Возвращает SugaredLogger для удобства использования или ошибку, если не удалось создать логгер.
 func NewLogger(level string) (*zap.SugaredLogger, error) {
 	logLevel, err := zap.ParseAtomicLevel(level)
 	if err != nil {

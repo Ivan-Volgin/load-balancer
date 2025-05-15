@@ -23,6 +23,7 @@ type Repository interface {
 	Close()
 }
 
+// NewRepository — создаёт и настраивает пул подключений к PostgreSQL, используя переданные параметры из конфига.
 func NewRepository(ctx context.Context, config config.PostgreSQL) (Repository, error) {
 	connString := fmt.Sprintf(
 		`user=%s password=%s host=%s port=%d dbname=%s sslmode=%s
@@ -53,6 +54,7 @@ func NewRepository(ctx context.Context, config config.PostgreSQL) (Repository, e
 	return &repository{pool}, nil
 }
 
+// Close закрывает соединение с базой данных. Функция была созданна для graceful shutdown.
 func (r *repository) Close() {
 	if r.pool != nil {
 		r.pool.Close()

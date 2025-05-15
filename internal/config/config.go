@@ -26,6 +26,8 @@ type PostgreSQL struct {
 	PoolMaxConnIdleTime time.Duration `yaml:"db_pool_max_conn_idle_time" default:"100s"`
 }
 
+//LoadConfig загружает и валидирует YAML-конфигурацию, считывая настройки порта, стратегии балансировки, список бэкендов
+//и параметры подключения к PostgreSQL. Возвращает ошибку, если файл не найден или содержит некорректные данные.
 func LoadConfig(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {

@@ -15,6 +15,7 @@ type ClientService struct {
 	repo   repo.Repository
 }
 
+// NewClientService — создаёт новый сервис для работы с клиентами, принимая репозиторий и логгер.
 func NewClientService(repo repo.Repository, logger *zap.SugaredLogger) *ClientService {
 	return &ClientService{
 		repo:   repo,
@@ -22,6 +23,7 @@ func NewClientService(repo repo.Repository, logger *zap.SugaredLogger) *ClientSe
 	}
 }
 
+// CreateClientHandler — обрабатывает POST-запросы, создаёт клиента с заданными параметрами и сохраняет в БД.
 func (cs *ClientService) CreateClientHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req models.RateLimitClient
@@ -52,6 +54,7 @@ func (cs *ClientService) CreateClientHandler() http.HandlerFunc {
 	}
 }
 
+// GetClientHandler — возвращает данные клиента по ID или 404, если не найден.
 func (cs *ClientService) GetClientHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
@@ -71,6 +74,7 @@ func (cs *ClientService) GetClientHandler() http.HandlerFunc {
 	}
 }
 
+// UpdateClientHandler — частично обновляет данные клиента (capacity, rate_per_second и т.д.) на основе JSON-запроса.
 func (cs *ClientService) UpdateClientHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
@@ -121,6 +125,7 @@ func (cs *ClientService) UpdateClientHandler() http.HandlerFunc {
 	}
 }
 
+// DeleteClientHandler — удаляет клиента из БД по ID.
 func (cs *ClientService) DeleteClientHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")

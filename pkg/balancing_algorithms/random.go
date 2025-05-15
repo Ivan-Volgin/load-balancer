@@ -15,6 +15,7 @@ type RandomBalancer struct {
 	rand     *rand.Rand
 }
 
+// NewRandomBalancer — создаёт новый экземпляр балансировщика, который случайным образом выбирает из доступных бэкендов.
 func NewRandomBalancer(backends []*models.Backend, logger *zap.SugaredLogger) *RandomBalancer {
 	return &RandomBalancer{
 		backends: backends,
@@ -23,6 +24,7 @@ func NewRandomBalancer(backends []*models.Backend, logger *zap.SugaredLogger) *R
 	}
 }
 
+// Next — выбирает случайный доступный бэкенд и логирует выбор.
 func (b *RandomBalancer) Next() *models.Backend {
 	b.mu.Lock()
 	defer b.mu.Unlock()

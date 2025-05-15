@@ -13,6 +13,7 @@ type RoundRobinBalancer struct {
 	log      *zap.SugaredLogger
 }
 
+// NewRoundRobinBalancer — создаёт балансировщик с алгоритмом Round Robin и начальным индексом.
 func NewRoundRobinBalancer(backends []*m.Backend, logger *zap.SugaredLogger) *RoundRobinBalancer {
 	return &RoundRobinBalancer{
 		backends: backends,
@@ -21,6 +22,7 @@ func NewRoundRobinBalancer(backends []*m.Backend, logger *zap.SugaredLogger) *Ro
 	}
 }
 
+// Next — выбирает следующий доступный бэкенд по кругу, пропуская недоступные, и обновляет текущий индекс.
 func (b *RoundRobinBalancer) Next() *m.Backend {
 	b.mu.Lock()
 	defer b.mu.Unlock()

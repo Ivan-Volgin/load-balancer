@@ -17,6 +17,7 @@ type leastConnsBackend struct {
 	activeConnections int64
 }
 
+// NewLeastConnectionsBalancer — создаёт новый экземпляр балансировщика, который выбирает бэкенд с наименьшим числом соединений.
 func NewLeastConnectionsBalancer(backends []*models.Backend, logger *zap.SugaredLogger) *LeastConnectionsBalancer {
 	wrapped := make([]*leastConnsBackend, len(backends))
 	for i, b := range backends {
@@ -31,6 +32,7 @@ func NewLeastConnectionsBalancer(backends []*models.Backend, logger *zap.Sugared
 	}
 }
 
+// Next — выбирает доступный бэкенд c наименьшим числом соединений.
 func (b *LeastConnectionsBalancer) Next() *models.Backend {
 	b.mu.Lock()
 	defer b.mu.Unlock()

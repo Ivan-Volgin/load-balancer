@@ -11,6 +11,7 @@ type Balancer interface {
 	Next() *m.Backend
 }
 
+// StartHealthCheck — запускает фоновую проверку доступности бэкендов через периодические HTTP-запросы.
 func StartHealthCheck(backends []*m.Backend, interval time.Duration, logger *zap.SugaredLogger) {
 	go func() {
 		ticker := time.NewTicker(interval)
@@ -38,6 +39,7 @@ func StartHealthCheck(backends []*m.Backend, interval time.Duration, logger *zap
 	}()
 }
 
+// isBackendAlive — проверяет, доступен ли бэкенд, отправляя GET-запрос с таймаутом 3 секунды.
 func isBackendAlive(url string) bool {
 	client := &http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Get(url)

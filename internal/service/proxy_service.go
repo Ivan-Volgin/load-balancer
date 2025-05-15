@@ -12,6 +12,7 @@ type ProxyService struct {
 	logger   *zap.SugaredLogger
 }
 
+// NewProxyService — создаёт сервис прокси с указанием балансировщика и логгера.
 func NewProxyService(balancer balancing_algorithms.Balancer, logger *zap.SugaredLogger) *ProxyService {
 	return &ProxyService{
 		balancer: balancer,
@@ -19,6 +20,7 @@ func NewProxyService(balancer balancing_algorithms.Balancer, logger *zap.Sugared
 	}
 }
 
+// ProxyHandler — основной обработчик запросов: выбирает бэкенд, проксирует запрос, помечает недоступные бэкенды.
 func (ps *ProxyService) ProxyHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		backend := ps.balancer.Next()

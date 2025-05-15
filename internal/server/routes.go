@@ -7,6 +7,7 @@ import (
 	"load-balancer/internal/service"
 )
 
+// RegisterRoutes — регистрирует HTTP-роуты: прокси с рейт-лимитом, а также CRUD-эндпоинты для клиентов.
 func RegisterRoutes(proxySvc *service.ProxyService, clientSvc *service.ClientService, middleware *middleware.RateLimitMiddleware) {
 	http.HandleFunc("/", middleware.Middleware(proxySvc.ProxyHandler()))
 	http.HandleFunc("POST /clients", clientSvc.CreateClientHandler())

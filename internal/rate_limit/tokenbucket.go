@@ -18,6 +18,7 @@ type TokenBucket struct {
 	logger  *zap.SugaredLogger
 }
 
+// NewTokenBucket — создаёт новый Token Bucket с подключением к репозиторию и логгером, инициализирует внутреннее хранилище клиентов.
 func NewTokenBucket(repo repo.Repository, logger *zap.SugaredLogger) *TokenBucket {
 	return &TokenBucket{
 		repo:    repo,
@@ -26,6 +27,8 @@ func NewTokenBucket(repo repo.Repository, logger *zap.SugaredLogger) *TokenBucke
 	}
 }
 
+// Allow — проверяет, есть ли у клиента токены для выполнения запроса, обновляет состояние bucket'а, загружает данные
+// из БД при необходимости.
 func (tb *TokenBucket) Allow(ctx context.Context, clientID string) (bool, error) {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
@@ -65,6 +68,7 @@ func (tb *TokenBucket) Allow(ctx context.Context, clientID string) (bool, error)
 	return true, nil
 }
 
+// StartBackgroundSync — запускает фоновую горутину, которая периодически сохраняет изменения по клиентам в БД.
 func (tb *TokenBucket) StartBackgroundSync(ctx context.Context, repo repo.Repository, interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	for {
@@ -78,6 +82,7 @@ func (tb *TokenBucket) StartBackgroundSync(ctx context.Context, repo repo.Reposi
 	}
 }
 
+// syncToDB — записывает в БД только изменённые (грязные) клиенты, помечая их как синхронизированные.
 func (tb *TokenBucket) syncToDB(repo repo.Repository) {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
@@ -104,6 +109,7 @@ func (tb *TokenBucket) syncToDB(repo repo.Repository) {
 	}
 }
 
+// StartInactiveCleaner — запускает фоновый процесс очистки неактивных клиентов из памяти через заданный интервал.
 func (tb *TokenBucket) StartInactiveCleaner(ctx context.Context, inactiveTimeout time.Duration, tickerInterval time.Duration) {
 	ticker := time.NewTicker(tickerInterval)
 	for {
@@ -117,6 +123,7 @@ func (tb *TokenBucket) StartInactiveCleaner(ctx context.Context, inactiveTimeout
 	}
 }
 
+// cleanupInactiveClients — удаляет из памяти клиентов, которые давно не делали запросов.
 func (tb *TokenBucket) cleanupInactiveClients(timeout time.Duration) {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
@@ -128,6 +135,7 @@ func (tb *TokenBucket) cleanupInactiveClients(timeout time.Duration) {
 	}
 }
 
+// ReplenishAll — фоновая задача, которая регулярно пополняет токены всех клиентов напрямую из БД.
 func (tb *TokenBucket) ReplenishAll(ctx context.Context, interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
@@ -144,6 +152,7 @@ func (tb *TokenBucket) ReplenishAll(ctx context.Context, interval time.Duration)
 	}
 }
 
+// replenishTick — выполняет одно пополнение токенов всех клиентов в БД, исходя из времени последнего пополнения.
 func (tb *TokenBucket) replenishTick(ctx context.Context) error {
 	clients, err := tb.repo.GetAllClients(ctx)
 	if err != nil {

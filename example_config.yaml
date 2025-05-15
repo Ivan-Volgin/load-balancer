@@ -1,0 +1,15 @@
+port: порт на котором будет работать сервис
+backends: список url бэкендов
+
+balance_strategy: стратегия балансировки (round_robin, least_connections, random). Указать только одну
+
+postgres: информация для подключения к базе postgres
+  db_host:
+  db_port:
+  db_name:
+  db_user:
+  db_password:
+  db_ssl_mode:
+  db_pool_max_conns:
+  db_pool_max_conn_lifetime:
+  db_pool_max_conn_idle_time:

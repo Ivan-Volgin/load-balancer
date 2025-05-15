@@ -16,6 +16,7 @@ const (
 	getAllClientsQuery = `SELECT client_id, capacity, rate_per_second, tokens, last_refill_at FROM clients`
 )
 
+// CreateClient — добавляет нового клиента в БД с заданными лимитами и состоянием токенов.
 func (r *repository) CreateClient(ctx context.Context, client m.RateLimitClient) error {
 	_, err := r.pool.Exec(ctx, createClientQuery, client.ClientID, client.Capacity, client.RatePerSecond, client.Tokens, client.LastRefillAt)
 	if err != nil {
@@ -24,6 +25,7 @@ func (r *repository) CreateClient(ctx context.Context, client m.RateLimitClient)
 	return nil
 }
 
+// GetClientByID — получает данные клиента по ID из БД, возвращает ошибку, если клиент не найден.
 func (r *repository) GetClientByID(ctx context.Context, id string) (*m.RateLimitClient, error) {
 	client := &m.RateLimitClient{ClientID: id}
 	err := r.pool.QueryRow(ctx, getClientQuery, id).Scan(&client.Capacity, &client.RatePerSecond, &client.Tokens, &client.LastRefillAt)
@@ -35,6 +37,7 @@ func (r *repository) GetClientByID(ctx context.Context, id string) (*m.RateLimit
 	return client, nil
 }
 
+// UpdateClient — обновляет данные клиента в БД, проверяет, была ли затронута хотя бы одна строка.
 func (r *repository) UpdateClient(ctx context.Context, client m.RateLimitClient) error {
 	commandTag, err := r.pool.Exec(ctx, updateClientQuery, client.ClientID, client.Capacity, client.RatePerSecond, client.Tokens, client.LastRefillAt)
 	if err != nil {
@@ -48,6 +51,7 @@ func (r *repository) UpdateClient(ctx context.Context, client m.RateLimitClient)
 	return nil
 }
 
+// DeleteClient — удаляет клиента из БД, возвращает ошибку, если запись не найдена.
 func (r *repository) DeleteClient(ctx context.Context, id string) error {
 	commandTag, err := r.pool.Exec(ctx, deleteClientQuery, id)
 	if err != nil {
@@ -61,6 +65,7 @@ func (r *repository) DeleteClient(ctx context.Context, id string) error {
 	return nil
 }
 
+// GetAllClients — возвращает список всех клиентов из БД, используется для фонового пополнения токенов.
 func (r *repository) GetAllClients(ctx context.Context) ([]*m.RateLimitClient, error) {
 	rows, err := r.pool.Query(ctx, getAllClientsQuery)
 	if err != nil {
